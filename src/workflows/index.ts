@@ -1,4 +1,5 @@
 import { CrowdinApi, isOptionalNumber, PaginationOptions, ResponseList, ResponseObject } from '../core';
+import { SourceStringsModel } from '../sourceStrings';
 
 /**
  * Workflows are the sequences of steps that content in your project should go through (e.g. pre-translation, translation, proofreading).
@@ -15,7 +16,7 @@ export class Workflows extends CrowdinApi {
     listWorkflowSteps(
         projectId: number,
         options?: PaginationOptions,
-    ): Promise<ResponseList<WorkflowModel.ListWorkflowStepsResponse>>;
+    ): Promise<ResponseList<WorkflowModel.WorkflowStep>>;
     /**
      * @param projectId project identifier
      * @param limit maximum number of items to retrieve (default 25)
@@ -27,12 +28,12 @@ export class Workflows extends CrowdinApi {
         projectId: number,
         limit?: number,
         offset?: number,
-    ): Promise<ResponseList<WorkflowModel.ListWorkflowStepsResponse>>;
+    ): Promise<ResponseList<WorkflowModel.WorkflowStep>>;
     listWorkflowSteps(
         projectId: number,
         options?: number | PaginationOptions,
         deprecatedOffset?: number,
-    ): Promise<ResponseList<WorkflowModel.ListWorkflowStepsResponse>> {
+    ): Promise<ResponseList<WorkflowModel.WorkflowStep>> {
         if (isOptionalNumber(options, '1' in arguments)) {
             options = { limit: options, offset: deprecatedOffset };
         }
@@ -45,12 +46,27 @@ export class Workflows extends CrowdinApi {
      * @param stepId workflow step identifier
      * @see https://support.crowdin.com/enterprise/api/#operation/api.projects.workflow-steps.getMany
      */
-    getWorkflowStep(
-        projectId: number,
-        stepId: number,
-    ): Promise<ResponseObject<WorkflowModel.ListWorkflowStepsResponse>> {
+    getWorkflowStep(projectId: number, stepId: number): Promise<ResponseObject<WorkflowModel.WorkflowStep>> {
         const url = `${this.url}/projects/${projectId}/workflow-steps/${stepId}`;
         return this.get(url, this.defaultConfig());
+    }
+
+    /**
+     * @param projectId project identifier
+     * @param stepId workflow step identifier
+     * @param options optional parameters for the request
+     * @see https://support.crowdin.com/developer/enterprise/api/v2/#tag/Workflows/operation/api.projects.workflow-steps.strings.getMany
+     */
+    listStringsOnTheWorkflowStep(
+        projectId: number,
+        stepId: number,
+        options?: WorkflowModel.ListStringsOntheWorkflowStepOptions,
+    ): Promise<ResponseList<SourceStringsModel.String>> {
+        let url = `${this.url}/projects/${projectId}/workflow-steps/${stepId}/strings`;
+        url = this.addQueryParam(url, 'languageIds', options?.languageIds);
+        url = this.addQueryParam(url, 'orderBy', options?.orderBy);
+        url = this.addQueryParam(url, 'status', options?.status);
+        return this.getList(url, options?.limit, options?.offset);
     }
 
     /**
@@ -96,21 +112,24 @@ export class Workflows extends CrowdinApi {
 }
 
 export namespace WorkflowModel {
-    export interface ListWorkflowStepsResponse {
+    export interface WorkflowStep {
         id: number;
         title: string;
         type: string;
         languages: string[];
-        config:
-            | {
-                  minRelevant: string;
-                  autoSubstitution: number;
-                  assignees: Record<string, number[]>;
-              }
-            | never[];
+        config: {
+            assignees: { [language: string]: number[] };
+        };
     }
+
     export interface ListWorkflowTemplatesOptions extends PaginationOptions {
         groupId?: number;
+    }
+
+    export interface ListStringsOntheWorkflowStepOptions extends PaginationOptions {
+        languageIds?: string;
+        orderBy?: string;
+        status?: 'todo' | 'done' | 'pending' | 'incomplete' | 'need_review';
     }
 
     export interface Workflow {
@@ -119,5 +138,17 @@ export namespace WorkflowModel {
         description: string;
         groupId: number;
         isDefault: boolean;
+        webUrl: string;
+        steps: {
+            id: number;
+            languages: string[];
+            assignees: number[];
+            vendorId: number;
+            config: {
+                minRelevant: number;
+                autoSubstitution: boolean;
+            };
+            mtId: number;
+        }[];
     }
 }

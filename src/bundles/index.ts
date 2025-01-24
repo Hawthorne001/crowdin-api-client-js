@@ -147,6 +147,7 @@ export namespace BundlesModel {
         labelIds: number[];
         excludeLabelIds: number[];
         createdAt: string;
+        webUrl: string;
         updatedAt: string;
     }
 
@@ -158,6 +159,7 @@ export namespace BundlesModel {
         exportPattern: string;
         isMultilingual?: boolean;
         includeProjectSourceLanguage?: boolean;
+        includeInContextPseudoLanguage?: boolean;
         labelIds?: number[];
         excludeLabelIds?: number[];
     }

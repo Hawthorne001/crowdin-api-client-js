@@ -75,6 +75,7 @@ export namespace FieldsModel {
         | 'projectSettings'
         | 'projectTaskEditCreate'
         | 'projectTaskDetails'
+        | 'projectTaskBoardCard'
         | 'fileDetails'
         | 'fileSettings'
         | 'userEditModal'
@@ -133,6 +134,6 @@ export namespace FieldsModel {
         type: Type;
         description?: string;
         entities: Entity[];
-        config: Config;
+        config?: Config;
     }
 }

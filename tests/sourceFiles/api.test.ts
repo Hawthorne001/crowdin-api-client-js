@@ -16,6 +16,9 @@ describe('Source Files API', () => {
     const fileRevisionId = 888;
 
     const branchId = 12;
+    const sourceBranchId = 14;
+    const mergeBranchId = 'merge-123';
+    const mergeBranchStatus = 'merged';
     const branchName = 'master';
     const branchTitle = 'testTitle';
     const storageId = 123;
@@ -27,11 +30,50 @@ describe('Source Files API', () => {
 
     const buildId = 121212;
 
+    const cloneId = 'test12312';
+
     const fileId = 321;
     const limit = 25;
 
     beforeAll(() => {
         scope = nock(api.url)
+            .get(`/projects/${projectId}/branches/${branchId}/clones/${cloneId}/branch`, undefined, {
+                reqheaders: {
+                    Authorization: `Bearer ${api.token}`,
+                },
+            })
+            .reply(200, {
+                data: {
+                    id: branchId,
+                    name: branchName,
+                },
+            })
+            .post(
+                `/projects/${projectId}/branches/${branchId}/clones`,
+                {
+                    name: branchName,
+                },
+                {
+                    reqheaders: {
+                        Authorization: `Bearer ${api.token}`,
+                    },
+                },
+            )
+            .reply(200, {
+                data: {
+                    identifier: cloneId,
+                },
+            })
+            .get(`/projects/${projectId}/branches/${branchId}/clones/${cloneId}`, undefined, {
+                reqheaders: {
+                    Authorization: `Bearer ${api.token}`,
+                },
+            })
+            .reply(200, {
+                data: {
+                    identifier: cloneId,
+                },
+            })
             .get(`/projects/${projectId}/branches`, undefined, {
                 reqheaders: {
                     Authorization: `Bearer ${api.token}`,
@@ -119,6 +161,42 @@ describe('Source Files API', () => {
                     id: branchId,
                     name: branchName,
                     title: branchTitle,
+                },
+            })
+            .post(
+                `/projects/${projectId}/branches/${branchId}/merges`,
+                {
+                    sourceBranchId,
+                },
+                {
+                    reqheaders: {
+                        Authorization: `Bearer ${api.token}`,
+                    },
+                },
+            )
+            .reply(200, {
+                data: {
+                    identifier: mergeBranchId,
+                },
+            })
+            .get(`/projects/${projectId}/branches/${branchId}/merges/${mergeBranchId}`, undefined, {
+                reqheaders: {
+                    Authorization: `Bearer ${api.token}`,
+                },
+            })
+            .reply(200, {
+                data: {
+                    identifier: mergeBranchId,
+                },
+            })
+            .get(`/projects/${projectId}/branches/${branchId}/merges/${mergeBranchId}/summary`, undefined, {
+                reqheaders: {
+                    Authorization: `Bearer ${api.token}`,
+                },
+            })
+            .reply(200, {
+                data: {
+                    status: mergeBranchStatus,
                 },
             })
             .get(`/projects/${projectId}/directories`, undefined, {
@@ -408,6 +486,24 @@ describe('Source Files API', () => {
         scope.done();
     });
 
+    it('Get Cloned Branch', async () => {
+        const branch = await api.getClonedBranch(projectId, branchId, cloneId);
+        expect(branch.data.id).toBe(branchId);
+        expect(branch.data.name).toBe(branchName);
+    });
+
+    it('Clone branch', async () => {
+        const clone = await api.clonedBranch(projectId, branchId, {
+            name: branchName,
+        });
+        expect(clone.data.identifier).toBe(cloneId);
+    });
+
+    it('Check Branch Clone Status', async () => {
+        const clone = await api.checkBranchClonedStatus(projectId, branchId, cloneId);
+        expect(clone.data.identifier).toBe(cloneId);
+    });
+
     it('List project branches', async () => {
         const branches = await api.listProjectBranches(projectId, { name: branchName });
         expect(branches.data.length).toBe(1);
@@ -447,6 +543,23 @@ describe('Source Files API', () => {
         expect(branch.data.id).toBe(branchId);
         expect(branch.data.name).toBe(branchName);
         expect(branch.data.title).toBe(branchTitle);
+    });
+
+    it('Merge branch', async () => {
+        const mergeStatus = await api.mergeBranch(projectId, branchId, {
+            sourceBranchId,
+        });
+        expect(mergeStatus.data.identifier).toBe(mergeBranchId);
+    });
+
+    it('Check Branch Merge Status', async () => {
+        const mergeStatus = await api.checkBranchMergeStatus(projectId, branchId, mergeBranchId);
+        expect(mergeStatus.data.identifier).toBe(mergeBranchId);
+    });
+
+    it('Get Branch Merge Summary', async () => {
+        const mergeStatus = await api.getBranchMergeSummary(projectId, branchId, mergeBranchId);
+        expect(mergeStatus.data.status).toBe(mergeBranchStatus);
     });
 
     it('List project directories', async () => {

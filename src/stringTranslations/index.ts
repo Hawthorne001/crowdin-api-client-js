@@ -75,6 +75,7 @@ export class StringTranslations extends CrowdinApi {
         url = this.addQueryParam(url, 'fileId', options.fileId);
         url = this.addQueryParam(url, 'labelIds', options.labelIds);
         url = this.addQueryParam(url, 'excludeLabelIds', options.excludeLabelIds);
+        url = this.addQueryParam(url, 'orderBy', options.orderBy);
         return this.getList(url, options.limit, options.offset);
     }
 
@@ -89,6 +90,17 @@ export class StringTranslations extends CrowdinApi {
     ): Promise<ResponseObject<StringTranslationsModel.Approval>> {
         const url = `${this.url}/projects/${projectId}/approvals`;
         return this.post(url, request, this.defaultConfig());
+    }
+
+    /**
+     * @param projectId project identifier
+     * @param stringId string identifier
+     * @see https://support.crowdin.com/developer/api/v2/#tag/String-Translations/operation/api.projects.approvals.deleteMany
+     */
+    removeStringApprovals(projectId: number, stringId: number): Promise<void> {
+        let url = `${this.url}/projects/${projectId}/approvals`;
+        url = this.addQueryParam(url, 'stringId', stringId);
+        return this.delete(url, this.defaultConfig());
     }
 
     /**
@@ -192,6 +204,12 @@ export class StringTranslations extends CrowdinApi {
         url = this.addQueryParam(url, 'labelIds', options.labelIds);
         url = this.addQueryParam(url, 'denormalizePlaceholders', options.denormalizePlaceholders);
         url = this.addQueryParam(url, 'croql', options.croql);
+        url = this.addQueryParam(url, 'orderBy', options.orderBy);
+        url = this.addQueryParam(url, 'approvedOnly', options.approvedOnly);
+        url = this.addQueryParam(url, 'passedWorkflow', options.passedWorkflow);
+        url = this.addQueryParam(url, 'branchId', options.branchId);
+        url = this.addQueryParam(url, 'directoryId', options.directoryId);
+        url = this.addQueryParam(url, 'minApprovalCount', options.minApprovalCount);
         return this.getList(url, options.limit, options.offset);
     }
 
@@ -258,6 +276,7 @@ export class StringTranslations extends CrowdinApi {
         url = this.addQueryParam(url, 'stringId', stringId);
         url = this.addQueryParam(url, 'languageId', languageId);
         url = this.addQueryParam(url, 'denormalizePlaceholders', options.denormalizePlaceholders);
+        url = this.addQueryParam(url, 'orderBy', options.orderBy);
         return this.getList(url, options.limit, options.offset);
     }
 
@@ -280,7 +299,7 @@ export class StringTranslations extends CrowdinApi {
      * @param languageId language identifier
      * @see https://developer.crowdin.com/api/v2/#operation/api.projects.translations.deleteMany
      */
-    deleteAllTranslations(projectId: number, stringId: number, languageId: string): Promise<void> {
+    deleteAllTranslations(projectId: number, stringId: number, languageId?: string): Promise<void> {
         let url = `${this.url}/projects/${projectId}/translations`;
         url = this.addQueryParam(url, 'stringId', stringId);
         url = this.addQueryParam(url, 'languageId', languageId);
@@ -381,6 +400,7 @@ export class StringTranslations extends CrowdinApi {
         url = this.addQueryParam(url, 'translationId', options.translationId);
         url = this.addQueryParam(url, 'labelIds', options.labelIds);
         url = this.addQueryParam(url, 'excludeLabelIds', options.excludeLabelIds);
+        url = this.addQueryParam(url, 'fileId', options.fileId);
         return this.getList(url, options.limit, options.offset);
     }
 
@@ -426,6 +446,7 @@ export namespace StringTranslationsModel {
         fileId?: number;
         labelIds?: string;
         excludeLabelIds?: string;
+        orderBy?: string;
     }
 
     export interface Approval {
@@ -458,6 +479,12 @@ export namespace StringTranslationsModel {
         labelIds?: string;
         denormalizePlaceholders?: BooleanInt;
         croql?: string;
+        approvedOnly?: BooleanInt;
+        passedWorkflow?: BooleanInt;
+        orderBy?: string;
+        branchId?: number;
+        minApprovalCount?: number;
+        directoryId?: number;
     }
 
     export interface PlainLanguageTranslation {
@@ -517,12 +544,14 @@ export namespace StringTranslationsModel {
         languageId: string;
         text: string;
         pluralCategoryName?: PluralCategoryName;
+        addToTm?: boolean;
     }
 
     export interface ListTranslationVotesOptions extends PaginationOptions {
         stringId?: number;
         languageId?: string;
         translationId?: number;
+        fileId?: number;
         labelIds?: string;
         excludeLabelIds?: string;
     }
@@ -551,6 +580,7 @@ export namespace StringTranslationsModel {
 
     export interface ListStringTranslationsOptions extends PaginationOptions {
         denormalizePlaceholders?: BooleanInt;
+        orderBy?: string;
     }
 
     export type PluralCategoryName = 'zero' | 'one' | 'two' | 'few' | 'many' | 'other';

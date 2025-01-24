@@ -17,6 +17,151 @@ import {
  */
 export class Reports extends CrowdinApi {
     /**
+     * @param options optional parameters for the request
+     * @see https://developer.crowdin.com/enterprise/api/v2/#operation/api.reports.archives.getMany
+     */
+    listOrganizationReportArchives(
+        options?: ReportsModel.ListReportArchiveParams,
+    ): Promise<ResponseList<ReportsModel.ReportArchive>> {
+        let url = `${this.url}/reports/archives`;
+        url = this.addQueryParam(url, 'scopeId', options?.scopeId);
+        url = this.addQueryParam(url, 'scopeType', options?.scopeType);
+        return this.getList(url, options?.limit, options?.offset);
+    }
+
+    /**
+     * @param archiveId archive identifier
+     * @see https://developer.crowdin.com/enterprise/api/v2/#operation/api.reports.archives.get
+     */
+    getOrganizationReportArchive(archiveId: number): Promise<ResponseObject<ReportsModel.ReportArchive>> {
+        const url = `${this.url}/reports/archives/${archiveId}`;
+        return this.get(url, this.defaultConfig());
+    }
+
+    /**
+     * @param archiveId archive identifier
+     * @see https://developer.crowdin.com/enterprise/api/v2/#operation/api.reports.archives.delete
+     */
+    deleteOrganizationReportArchive(archiveId: number): Promise<void> {
+        const url = `${this.url}/reports/archives/${archiveId}`;
+        return this.delete(url, this.defaultConfig());
+    }
+
+    /**
+     * @param archiveId archive identifier
+     * @see https://developer.crowdin.com/enterprise/api/v2/#operation/api.reports.archives.exports.post
+     */
+    exportOrganizationReportArchive(
+        archiveId: number,
+        request: { format?: ReportsModel.Format } = {},
+    ): Promise<ResponseObject<Status<ReportsModel.ReportArchiveStatusAttribute>>> {
+        const url = `${this.url}/reports/archives/${archiveId}/exports`;
+        return this.post(url, request, this.defaultConfig());
+    }
+
+    /**
+     * @param archiveId archive identifier
+     * @param exportId export identifier
+     * @see https://developer.crowdin.com/enterprise/api/v2/#operation/api.reports.archives.exports.get
+     */
+    checkOrganizationReportArchiveStatus(
+        archiveId: number,
+        exportId: string,
+    ): Promise<ResponseObject<Status<ReportsModel.ReportArchiveStatusAttribute>>> {
+        const url = `${this.url}/reports/archives/${archiveId}/exports/${exportId}`;
+        return this.get(url, this.defaultConfig());
+    }
+
+    /**
+     * @param archiveId archive identifier
+     * @param exportId export identifier
+     * @see https://developer.crowdin.com/enterprise/api/v2/#operation/api.reports.archives.exports.download.get
+     */
+    downloadOrganizationReportArchive(archiveId: number, exportId: string): Promise<ResponseObject<DownloadLink>> {
+        const url = `${this.url}/reports/archives/${archiveId}/exports/${exportId}/download`;
+        return this.get(url, this.defaultConfig());
+    }
+
+    /**
+     * @param userId user identifier
+     * @param options optional parameters for the request
+     * @see https://developer.crowdin.com/api/v2/#operation/api.reports.archives.getMany
+     */
+    listUserReportArchives(
+        userId: number,
+        options?: ReportsModel.ListReportArchiveParams,
+    ): Promise<ResponseList<ReportsModel.ReportArchive>> {
+        let url = `${this.url}/users/${userId}/reports/archives`;
+        url = this.addQueryParam(url, 'scopeId', options?.scopeId);
+        url = this.addQueryParam(url, 'scopeType', options?.scopeType);
+        return this.getList(url, options?.limit, options?.offset);
+    }
+
+    /**
+     * @param userId user identifier
+     * @param archiveId archive identifier
+     * @see https://developer.crowdin.com/api/v2/#operation/api.users.reports.archives.get
+     */
+    getUserReportArchive(userId: number, archiveId: number): Promise<ResponseObject<ReportsModel.ReportArchive>> {
+        const url = `${this.url}/users/${userId}/reports/archives/${archiveId}`;
+        return this.get(url, this.defaultConfig());
+    }
+
+    /**
+     * @param userId user identifier
+     * @param archiveId archive identifier
+     * @see https://developer.crowdin.com/api/v2/#operation/api.users.reports.archives.delete
+     */
+    deleteUserReportArchive(userId: number, archiveId: number): Promise<void> {
+        const url = `${this.url}/users/${userId}/reports/archives/${archiveId}`;
+        return this.delete(url, this.defaultConfig());
+    }
+
+    /**
+     * @param userId user identifier
+     * @param archiveId archive identifier
+     * @see https://developer.crowdin.com/api/v2/#operation/api.reports.archives.exports.post
+     */
+    exportUserReportArchive(
+        userId: number,
+        archiveId: number,
+        request: { format?: ReportsModel.Format } = {},
+    ): Promise<ResponseObject<Status<ReportsModel.ReportArchiveStatusAttribute>>> {
+        const url = `${this.url}/users/${userId}/reports/archives/${archiveId}/exports`;
+        return this.post(url, request, this.defaultConfig());
+    }
+
+    /**
+     * @param userId user identifier
+     * @param archiveId archive identifier
+     * @param exportId export identifier
+     * @see https://developer.crowdin.com/api/v2/#operation/api.users.reports.archives.exports.get
+     */
+    checkUserReportArchiveStatus(
+        userId: number,
+        archiveId: number,
+        exportId: string,
+    ): Promise<ResponseObject<Status<ReportsModel.ReportArchiveStatusAttribute>>> {
+        const url = `${this.url}/users/${userId}/reports/archives/${archiveId}/exports/${exportId}`;
+        return this.get(url, this.defaultConfig());
+    }
+
+    /**
+     * @param userId user identifier
+     * @param archiveId archive identifier
+     * @param exportId export identifier
+     * @see https://developer.crowdin.com/api/v2/#operation/api.users.reports.archives.exports.download.get
+     */
+    downloadUserReportArchive(
+        userId: number,
+        archiveId: number,
+        exportId: string,
+    ): Promise<ResponseObject<DownloadLink>> {
+        const url = `${this.url}/users/${userId}/reports/archives/${archiveId}/exports/${exportId}/download`;
+        return this.get(url, this.defaultConfig());
+    }
+
+    /**
      * @param groupId group identifier
      * @param request request body
      * @see https://support.crowdin.com/enterprise/api/#operation/api.groups.reports.post
@@ -50,6 +195,63 @@ export class Reports extends CrowdinApi {
     downloadGroupReport(groupId: number, reportId: string): Promise<ResponseObject<DownloadLink>> {
         const url = `${this.url}/groups/${groupId}/reports/${reportId}/download`;
         return this.get(url, this.defaultConfig());
+    }
+
+    /**
+     * @param options optional parameters for the request
+     * @see https://support.crowdin.com/developer/enterprise/api/v2/#tag/Reports/operation/api.reports.settings-templates.getMany
+     */
+    listOrganizationReportSettingsTemplates(
+        options?: ReportsModel.ListOrganizationReportSettingsParams,
+    ): Promise<ResponseList<ReportsModel.OrganizationReportSettings>> {
+        let url = `${this.url}/reports/settings-templates`;
+        url = this.addQueryParam(url, 'projectId', options?.projectId);
+        url = this.addQueryParam(url, 'groupId', options?.groupId);
+        return this.getList(url, options?.limit, options?.offset);
+    }
+
+    /**
+     * @param request request body
+     * @see https://support.crowdin.com/developer/enterprise/api/v2/#tag/Reports/operation/api.reports.settings-templates.post
+     */
+    addOrganizationReportSettingsTemplate(
+        request: ReportsModel.AddOrganizationReportSettingsRequest,
+    ): Promise<ResponseObject<ReportsModel.OrganizationReportSettings>> {
+        const url = `${this.url}/reports/settings-templates`;
+        return this.post(url, request, this.defaultConfig());
+    }
+
+    /**
+     * @param reportSettingsTemplateId report settings template identifier
+     * @see https://support.crowdin.com/developer/enterprise/api/v2/#tag/Reports/operation/api.reports.settings-templates.get
+     */
+    getOrganizationReportSettingsTemplate(
+        reportSettingsTemplateId: number,
+    ): Promise<ResponseObject<ReportsModel.OrganizationReportSettings>> {
+        const url = `${this.url}/reports/settings-templates/${reportSettingsTemplateId}`;
+        return this.get(url, this.defaultConfig());
+    }
+
+    /**
+     * @param reportSettingsTemplateId report settings template identifier
+     * @param request request body
+     * @see https://support.crowdin.com/developer/enterprise/api/v2/#tag/Reports/operation/api.reports.settings-templates.patch
+     */
+    editOrganizationReportSettingsTemplate(
+        reportSettingsTemplateId: number,
+        request: PatchRequest[],
+    ): Promise<ResponseObject<ReportsModel.OrganizationReportSettings>> {
+        const url = `${this.url}/reports/settings-templates/${reportSettingsTemplateId}`;
+        return this.patch(url, request, this.defaultConfig());
+    }
+
+    /**
+     * @param reportSettingsTemplateId report settings template identifier
+     * @see https://support.crowdin.com/developer/enterprise/api/v2/#tag/Reports/operation/api.reports.settings-templates.delete
+     */
+    deleteOrganizationReportSettingsTemplate(reportSettingsTemplateId: number): Promise<void> {
+        const url = `${this.url}/reports/settings-templates/${reportSettingsTemplateId}`;
+        return this.delete(url, this.defaultConfig());
     }
 
     /**
@@ -139,7 +341,7 @@ export class Reports extends CrowdinApi {
      */
     addReportSettingsTemplate(
         projectId: number,
-        request: Omit<ReportsModel.ReportSettings, 'id' | 'createdAt' | 'updatedAt'>,
+        request: ReportsModel.AddReportSettingsRequest,
     ): Promise<ResponseObject<ReportsModel.ReportSettings>> {
         const url = `${this.url}/projects/${projectId}/reports/settings-templates`;
         return this.post(url, request, this.defaultConfig());
@@ -182,18 +384,98 @@ export class Reports extends CrowdinApi {
         const url = `${this.url}/projects/${projectId}/reports/settings-templates/${reportSettingsTemplateId}`;
         return this.delete(url, this.defaultConfig());
     }
+
+    /**
+     * @param userId user identifier
+     * @param options optional parameters for the request
+     * @see https://support.crowdin.com/developer/api/v2/#tag/Reports/operation/api.users.reports.settings-templates.getMany
+     */
+    listUserReportSettingsTemplates(
+        userId: number,
+        options?: PaginationOptions,
+    ): Promise<ResponseList<ReportsModel.UserReportSettings>> {
+        const url = `${this.url}/users/${userId}/reports/settings-templates`;
+        return this.getList(url, options?.limit, options?.offset);
+    }
+
+    /**
+     * @param userId user identifier
+     * @param request request body
+     * @see https://support.crowdin.com/developer/api/v2/#tag/Reports/operation/api.users.reports.settings-templates.post
+     */
+    addUserReportSettingsTemplate(
+        userId: number,
+        request: ReportsModel.AddUserReportSettingsRequest,
+    ): Promise<ResponseObject<ReportsModel.UserReportSettings>> {
+        const url = `${this.url}/users/${userId}/reports/settings-templates`;
+        return this.post(url, request, this.defaultConfig());
+    }
+
+    /**
+     * @param userId user identifier
+     * @param reportSettingsTemplateId report settings template identifier
+     * @see https://support.crowdin.com/developer/api/v2/#tag/Reports/operation/api.users.reports.settings-templates.get
+     */
+    getUserReportSettingsTemplate(
+        userId: number,
+        reportSettingsTemplateId: number,
+    ): Promise<ResponseObject<ReportsModel.UserReportSettings>> {
+        const url = `${this.url}/users/${userId}/reports/settings-templates/${reportSettingsTemplateId}`;
+        return this.get(url, this.defaultConfig());
+    }
+
+    /**
+     * @param userId user identifier
+     * @param reportSettingsTemplateId report settings template identifier
+     * @param request request body
+     * @see https://support.crowdin.com/developer/api/v2/#tag/Reports/operation/api.users.reports.settings-templates.patch
+     */
+    editUserReportSettingsTemplate(
+        userId: number,
+        reportSettingsTemplateId: number,
+        request: PatchRequest[],
+    ): Promise<ResponseObject<ReportsModel.UserReportSettings>> {
+        const url = `${this.url}/users/${userId}/reports/settings-templates/${reportSettingsTemplateId}`;
+        return this.patch(url, request, this.defaultConfig());
+    }
+
+    /**
+     * @param userId user identifier
+     * @param reportSettingsTemplateId report settings template identifier
+     * @see https://support.crowdin.com/developer/api/v2/#tag/Reports/operation/api.users.reports.settings-templates.delete
+     */
+    deleteUserReportSettingsTemplate(userId: number, reportSettingsTemplateId: number): Promise<void> {
+        const url = `${this.url}/users/${userId}/reports/settings-templates/${reportSettingsTemplateId}`;
+        return this.delete(url, this.defaultConfig());
+    }
 }
 
 export namespace ReportsModel {
-    export type GroupReportSchema =
-        | GroupTranslationCostsPerEditingSchema
-        | GroupTranslationCostsPerEditingByTaskSchema
-        | CostsEstimationSchema
-        | CostsEstimationByTaskSchema
-        | GroupTranslationCostSchema
-        | GroupTopMembersSchema;
+    export interface ReportArchive {
+        id: number;
+        scopeType: string;
+        scopeId: number;
+        userId: number;
+        name: string;
+        webUrl: string;
+        scheme: any;
+        createdAt: string;
+    }
 
-    export type OrganizationReportSchema = GroupTranslationCostsPerEditingSchema | GroupTopMembersSchema;
+    export interface ListReportArchiveParams extends PaginationOptions {
+        scopeType: string;
+        scopeId: number;
+    }
+
+    export interface ReportArchiveStatusAttribute {
+        format: Format;
+        reportName: string;
+        schema: any;
+    }
+
+    export type GroupReportSchema = GroupTranslationCostsPostEditingSchema | GroupTopMembersSchema;
+
+    export type OrganizationReportSchema = GroupTranslationCostsPostEditingSchema | GroupTopMembersSchema;
 
     export interface GenerateGroupReportRequest {
         name: string;
@@ -205,7 +487,7 @@ export namespace ReportsModel {
         schema: OrganizationReportSchema;
     }
 
-    export interface GroupTranslationCostsPerEditingSchema {
+    export interface GroupTranslationCostsPostEditingSchema {
         projectIds?: number[];
         unit?: Unit;
         currency?: Currency;
@@ -213,14 +495,12 @@ export namespace ReportsModel {
         baseRates: BaseRate;
         individualRates: IndividualRate[];
         netRateSchemes: NetRateSchemas;
+        excludeApprovalsForEditedTranslations?: boolean;
+        preTranslatedStringsCategorizationAdjustment?: boolean;
         groupBy?: GroupBy;
         dateFrom?: string;
         dateTo?: string;
-        languageId?: string[];
         userIds?: number[];
-        branchIds?: number[];
-        labelIds?: number[];
-        labelIncludeType?: LabelIncludeType;
     }
 
     export interface GroupTranslationCostsPerEditingByTaskSchema {
@@ -268,7 +548,6 @@ export namespace ReportsModel {
         unit?: Unit;
         languageId?: string;
         format?: Format;
-        groupBy?: GroupBy;
         dateFrom?: string;
         dateTo?: string;
     }
@@ -282,33 +561,76 @@ export namespace ReportsModel {
         dateTo?: string;
     }
 
-    export type ReportSchema =
-        | CostEstimationPostEndingSchema
-        | CostEstimationPostEndingSchemaByTask
-        | CostEstimateSchema
-        | CostEstimateFuzzyModeSchema
-        | TranslationCostsPostEndingSchema
-        | TranslationCostsPostEndingSchemaByTask
-        | TranslationCostSchema
-        | TopMembersSchema
-        | ContributionRawDataSchema;
+    export type GenerateReportRequest =
+        | PreTranslateAccuracy
+        | TranslateAccuracy
+        | CostEstimationPostEnding
+        | TranslationCostsPostEnding
+        | TopMembers
+        | ContributionRawData;
 
-    export interface GenerateReportRequest {
-        name:
-            | 'costs-estimation'
-            | 'translation-costs'
-            | 'top-members'
-            | 'contribution-raw-data'
-            | 'costs-estimation-pe'
-            | 'translation-costs-pe';
-        schema: ReportSchema;
+    export type ReportSchema = Pick<GenerateReportRequest, 'schema'>;
+
+    export interface PreTranslateAccuracy {
+        name: 'pre-translate-efficiency' | 'pre-translate-accuracy';
+        schema: PreTranslateAccuracySchema | PreTranslateAccuracySchemaByTask;
+    }
+
+    export interface TranslateAccuracy {
+        name: 'translator-accuracy';
+        schema: TranslateAccuracySchema;
+    }
+
+    export interface CostEstimationPostEnding {
+        name: 'costs-estimation-pe';
+        schema: CostEstimationPostEndingSchema | CostEstimationPostEndingSchemaByTask;
+    }
+
+    export interface TranslationCostsPostEnding {
+        name: 'translation-costs-pe';
+        schema: TranslationCostsPostEndingSchema | TranslationCostsPostEndingSchemaByTask;
+    }
+
+    export interface TopMembers {
+        name: 'top-members';
+        schema: TopMembersSchema;
+    }
+
+    export interface ContributionRawData {
+        name: 'contribution-raw-data';
+        schema: ContributionRawDataSchema | ContributionRawDataSchemaByTask;
     }
 
     export interface ReportStatusAttributes<S> {
         format: Format;
         reportName: string;
-        projectIds?: number[];
         schema: S;
+    }
+
+    export interface PreTranslateAccuracySchema {
+        unit?: Unit;
+        format?: Format;
+        postEditingCategories?: string[];
+        languageId?: string;
+        dateFrom?: string;
+        dateTo?: string;
+    }
+
+    export interface PreTranslateAccuracySchemaByTask {
+        unit?: Unit;
+        format?: Format;
+        postEditingCategories?: string[];
+        taskId?: number;
+    }
+
+    export interface TranslateAccuracySchema {
+        unit?: Unit;
+        format?: Format;
+        postEditingCategories?: string[];
+        languageId?: string;
+        userIds?: number[];
+        dateFrom?: string;
+        dateTo?: string;
     }
 
     export interface CostEstimationPostEndingSchema {
@@ -328,6 +650,7 @@ export namespace ReportsModel {
         dateTo?: string;
         labelIds?: number[];
         labelIncludeType?: LabelIncludeType;
+        workflowStepId?: number;
     }
 
     export interface CostEstimationPostEndingSchemaByTask {
@@ -349,7 +672,9 @@ export namespace ReportsModel {
         baseRates: BaseRate;
         individualRates: IndividualRate[];
         netRateSchemes: NetRateSchemas;
-        taskId: number;
+        taskId?: number;
+        excludeApprovalsForEditedTranslations?: boolean;
+        preTranslatedStringsCategorizationAdjustment?: boolean;
     }
 
     export interface TranslationCostsPostEndingSchema {
@@ -359,7 +684,9 @@ export namespace ReportsModel {
         baseRates: BaseRate;
         individualRates: IndividualRate[];
         netRateSchemes: NetRateSchemas;
-        groupBy: GroupBy;
+        excludeApprovalsForEditedTranslations?: boolean;
+        preTranslatedStringsCategorizationAdjustment?: boolean;
+        groupBy?: GroupBy;
         dateFrom?: string;
         dateTo?: string;
         languageId?: string;
@@ -367,6 +694,9 @@ export namespace ReportsModel {
         fileIds?: number[];
         directoryIds?: number[];
         branchIds?: number[];
+        labelIds?: number;
+        labelIncludeType?: LabelIncludeType;
+        workflowStepId?: number;
     }
 
     export interface TopMembersSchema {
@@ -382,8 +712,41 @@ export namespace ReportsModel {
         unit?: Unit;
         languageId?: string;
         userId?: string;
+        columns?: Column[];
+        fileIds?: number[];
+        directoryIds?: number[];
+        branchIds?: number[];
+        tmIds?: number[];
+        mtIds?: number[];
+        aiPromptIds?: number[];
         dateFrom?: string;
         dateTo?: string;
+    }
+
+    export interface ContributionRawDataSchemaByTask {
+        mode: ContributionMode;
+        unit?: Unit;
+        taskId: number;
+        columns?: Column[];
+        tmIds?: number[];
+        mtIds?: number[];
+        aiPromptIds?: number[];
+        dateFrom?: string;
+        dateTo?: string;
+    }
+
+    export interface PreTranslateEfficiencySchema {
+        unit?: Unit;
+        format?: Format;
+        postEditingCategories?: string[];
+        languageId?: string;
+        dateFrom?: string;
+        dateTo?: string;
+    }
+
+    export interface ListOrganizationReportSettingsParams extends PaginationOptions {
+        projectId?: number;
+        groupId?: number;
     }
 
     export interface ReportSettings {
@@ -393,9 +756,31 @@ export namespace ReportsModel {
         unit: Unit;
         config: ReportSettinsConfig;
         isPublic: boolean;
+        isGlobal: boolean;
         createdAt: string;
         updatedAt: string;
     }
+
+    export interface AddReportSettingsRequest {
+        name: string;
+        currency: Currency;
+        unit: Unit;
+        config: ReportSettinsConfig;
+        isPublic?: boolean;
+        isGlobal?: boolean;
+    }
+
+    export type UserReportSettings = Omit<ReportSettings, 'isPublic' | 'isGlobal'>;
+    export type AddUserReportSettingsRequest = Omit<AddReportSettingsRequest, 'isPublic' | 'isGlobal'>;
+
+    export type OrganizationReportSettings = Omit<ReportSettings, 'isGlobal'> & {
+        projectId: number;
+        groupId: number;
+    };
+    export type AddOrganizationReportSettingsRequest = Omit<AddReportSettingsRequest, 'isGlobal'> & {
+        projectId?: number;
+        groupId?: number;
+    };
 
     export interface ReportSettinsConfig {
         baseRates: BaseRate;
@@ -448,11 +833,15 @@ export namespace ReportsModel {
             matchType: Mode;
             price: number;
         }[];
-        mtMatch?: {
+        mtMatch: {
             matchType: Mode;
             price: number;
         }[];
-        suggestionMatch?: {
+        suggestionMatch: {
+            matchType: Mode;
+            price: number;
+        }[];
+        aiMatch?: {
             matchType: Mode;
             price: number;
         }[];
@@ -466,82 +855,29 @@ export namespace ReportsModel {
 
     export type LabelIncludeType = 'strings_with_label' | 'strings_without_label';
 
-    /**
-     * @deprecated
-     */
-    export interface GroupTranslationCostSchema {
-        projectIds?: number[];
-        unit?: Unit;
-        currency?: Currency;
-        format?: Format;
-        groupBy?: GroupBy;
-        dateFrom?: string;
-        dateTo?: string;
-    }
-
-    /**
-     * @deprecated
-     */
-    export interface CostEstimateSchema {
-        unit?: Unit;
-        currency?: Currency;
-        mode?: string;
-        languageId?: string;
-        fileIds?: number[];
-        format?: Format;
-        regularRates?: RegularRate[];
-        individualRates?: IndividualRate[];
-        dateFrom?: string;
-        dateTo?: string;
-        stepTypes?: Array<TranslateStep | ProofreadStep>;
-    }
-
-    /**
-     * @deprecated
-     */
-    export interface CostEstimateFuzzyModeSchema extends CostEstimateSchema {
-        calculateInternalFuzzyMatches?: boolean;
-    }
-
-    /**
-     * @deprecated
-     */
-    export interface TranslationCostSchema {
-        unit?: Unit;
-        currency?: Currency;
-        mode?: string;
-        languageId?: string;
-        format?: Format;
-        groupBy?: GroupBy;
-        regularRates?: RegularRate[];
-        individualRates?: IndividualRate[];
-        dateFrom?: string;
-        dateTo?: string;
-        stepTypes?: Array<TranslateStep | ProofreadStep>;
-    }
-
-    /**
-     * @deprecated
-     */
-    export type TranslationCostFuzzyModeSchema = TranslationCostSchema;
-
-    //used only in deprecated types
-    export interface TranslateStep {
-        type: string;
-        mode: string;
-        regularRates: RegularRate[];
-        individualRates: IndividualRate[];
-    }
-
-    export interface ProofreadStep {
-        type: string;
-        mode: string;
-        regularRates: RegularRate[];
-        individualRates: IndividualRate[];
-    }
-
-    export interface RegularRate {
-        mode: Mode;
-        value: number;
-    }
+    export type Column =
+        | 'userId'
+        | 'languageId'
+        | 'stringId'
+        | 'translationId'
+        | 'fileId'
+        | 'filePath'
+        | 'pluralForm'
+        | 'sourceStringTextHash'
+        | 'mtEngine'
+        | 'mtId'
+        | 'tmName'
+        | 'tmId'
+        | 'aiPromptName'
+        | 'aiPromptId'
+        | 'preTranslated'
+        | 'tmMatch'
+        | 'mtMatch'
+        | 'aiMatch'
+        | 'suggestionMatch'
+        | 'sourceUnits'
+        | 'targetUnits'
+        | 'createdAt'
+        | 'updatedAt'
+        | 'mark';
 }

@@ -8,6 +8,8 @@ import {
     ResponseList,
     ResponseObject,
 } from '../core';
+import { ProjectsGroupsModel } from '../projectsGroups';
+import { TeamsModel } from '../teams';
 
 /**
  * Users API gives you the possibility to get profile information about the currently authenticated user.
@@ -65,6 +67,7 @@ export class Users extends CrowdinApi {
         url = this.addQueryParam(url, 'role', options.role);
         url = this.addQueryParam(url, 'languageId', options.languageId);
         url = this.addQueryParam(url, 'workflowStepId', options.workflowStepId);
+        url = this.addQueryParam(url, 'orderBy', options.orderBy);
         return this.getList(url, options.limit, options.offset);
     }
 
@@ -159,6 +162,7 @@ export class Users extends CrowdinApi {
         url = this.addQueryParam(url, 'status', options.status);
         url = this.addQueryParam(url, 'search', options.search);
         url = this.addQueryParam(url, 'twoFactor', options.twoFactor);
+        url = this.addQueryParam(url, 'orderBy', options.orderBy);
         return this.getList(url, options.limit, options.offset);
     }
 
@@ -206,6 +210,54 @@ export class Users extends CrowdinApi {
         const url = `${this.url}/user`;
         return this.get(url, this.defaultConfig());
     }
+
+    /**
+     * @param request request body
+     * @see https://developer.crowdin.com/api/v2/#operation/api.user.patch
+     */
+    editAuthenticatedUser(request: PatchRequest[]): Promise<ResponseObject<UsersModel.User>> {
+        const url = `${this.url}/user`;
+        return this.patch(url, request, this.defaultConfig());
+    }
+
+    /**
+     * @param userId user identifier
+     * @param options request options
+     * @see https://developer.crowdin.com/enterprise/api/v2/#operation/api.users.projects.permissions.getMany
+     */
+    listUserProjectPermissions(
+        userId: number,
+        options?: PaginationOptions,
+    ): Promise<ResponseList<UsersModel.ProjectPermissions>> {
+        const url = `${this.url}/users/${userId}/projects/permissions`;
+        return this.getList(url, options?.limit, options?.offset);
+    }
+
+    /**
+     * @param userId user identifier
+     * @param request request body
+     * @see https://developer.crowdin.com/enterprise/api/v2/#operation/api.users.projects.permissions.patch
+     */
+    editUserProjectPermissions(
+        userId: number,
+        request: PatchRequest[],
+    ): Promise<ResponseList<UsersModel.ProjectPermissions>> {
+        const url = `${this.url}/users/${userId}/projects/permissions`;
+        return this.patch(url, request, this.defaultConfig());
+    }
+
+    /**
+     * @param userId user identifier
+     * @param options request options
+     * @see https://developer.crowdin.com/enterprise/api/v2/#operation/api.users.projects.contributions.getMany
+     */
+    listUserProjectContributions(
+        userId: number,
+        options?: PaginationOptions,
+    ): Promise<ResponseList<UsersModel.ProjectPermissions>> {
+        const url = `${this.url}/users/${userId}/projects/contributions`;
+        return this.getList(url, options?.limit, options?.offset);
+    }
 }
 
 export namespace UsersModel {
@@ -214,12 +266,14 @@ export namespace UsersModel {
         role?: Role;
         languageId?: string;
         workflowStepId?: number;
+        orderBy?: string;
     }
 
     export interface ListUsersOptions extends PaginationOptions {
         status?: Status;
         search?: string;
         twoFactor?: TwoFactor;
+        orderBy?: string;
     }
 
     export interface InviteUserRequest {
@@ -297,17 +351,17 @@ export namespace UsersModel {
         userIds: number[];
         usernames: string[];
         emails: string[];
-        /**
-         * @deprecated
-         */
-        accessToAllWorkflowSteps?: boolean;
         managerAccess?: boolean;
+        roles?: ProjectRole[];
         developerAccess?: boolean;
         /**
          * @deprecated
          */
+        accessToAllWorkflowSteps?: boolean;
+        /**
+         * @deprecated
+         */
         permissions?: Permissions;
-        roles?: ProjectRole[];
     }
 
     export interface AddProjectMemberResponse {
@@ -317,16 +371,38 @@ export namespace UsersModel {
     }
 
     export interface ReplaceProjectMemberRequest {
+        managerAccess?: boolean;
+        developerAccess?: boolean;
+        roles?: ProjectRole[];
         /**
          * @deprecated
          */
         accessToAllWorkflowSteps?: boolean;
-        managerAccess?: boolean;
         /**
          * @deprecated
          */
         permissions?: Permissions;
-        roles?: ProjectRole[];
+    }
+
+    export interface ProjectPermissions {
+        id: number;
+        roles: ProjectRole[];
+        project: ProjectsGroupsModel.Project | ProjectsGroupsModel.ProjectSettings;
+        teams: TeamsModel.Team[];
+    }
+
+    export interface Contributions {
+        id: number;
+        translated: Contribution;
+        approved: Contribution;
+        voted: Contribution;
+        commented: Contribution;
+        project: ProjectsGroupsModel.Project | ProjectsGroupsModel.ProjectSettings;
+    }
+
+    export interface Contribution {
+        strings: number;
+        words?: number;
     }
 
     export interface Permissions {

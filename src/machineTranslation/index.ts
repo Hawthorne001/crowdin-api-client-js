@@ -2,7 +2,6 @@ import { CrowdinApi, isOptionalNumber, PaginationOptions, PatchRequest, Response
 
 /**
  * Machine Translation Engines (MTE) are the sources for pre-translations.
- * You can currently connect Google Translate, Microsoft Translator, Yandex. Translate, DeepL Pro, Amazon Translate, and Watson (IBM) Translate engines.
  *
  * Use API to add, update, and delete specific MTE.
  */
@@ -114,15 +113,16 @@ export namespace MachineTranslationModel {
         | { apiKey: string }
         | { credentials: string }
         | { model: string; apiKey: string }
+        | { isSystemCredentials: boolean; apiKey: string }
         | { endpoint: string; apiKey: string }
         | { url: string }
         | { accessKey: string; secretKey: string };
 
     export interface CreateMachineTranslationRequest {
         name: string;
-        groupId?: number;
         type: string;
         credentials: Credentials;
+        groupId?: number;
         enabledLanguageIds?: string[];
         enabledProjectIds?: number[];
         isEnabled?: boolean;

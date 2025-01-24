@@ -7,6 +7,7 @@ import {
     PatchRequest,
     ResponseList,
     ResponseObject,
+    Status,
 } from '../core';
 
 /**
@@ -16,6 +17,47 @@ import {
  * Before adding source files to the project, upload each file to the Storage first.
  */
 export class SourceFiles extends CrowdinApi {
+    /**
+     * @param projectId project identifier
+     * @param branchId branch identifier
+     * @param cloneId clone branch identifier
+     * @see https://developer.crowdin.com/api/v2/string-based/#operation/api.projects.branches.clones.branch.get
+     */
+    getClonedBranch(
+        projectId: number,
+        branchId: number,
+        cloneId: string,
+    ): Promise<ResponseObject<SourceFilesModel.Branch>> {
+        const url = `${this.url}/projects/${projectId}/branches/${branchId}/clones/${cloneId}/branch`;
+        return this.get(url, this.defaultConfig());
+    }
+
+    /**
+     * @param projectId project identifier
+     * @param branchId branch identifier
+     * @param request request body
+     * @see https://developer.crowdin.com/api/v2/string-based/#operation/api.projects.branches.clones.post
+     */
+    clonedBranch(
+        projectId: number,
+        branchId: number,
+        request: SourceFilesModel.CloneBranchRequest,
+    ): Promise<ResponseObject<Status<{}>>> {
+        const url = `${this.url}/projects/${projectId}/branches/${branchId}/clones`;
+        return this.post(url, request, this.defaultConfig());
+    }
+
+    /**
+     * @param projectId project identifier
+     * @param branchId branch identifier
+     * @param cloneId clone branch identifier
+     * @see https://developer.crowdin.com/api/v2/string-based/#operation/api.projects.branches.clones.get
+     */
+    checkBranchClonedStatus(projectId: number, branchId: number, cloneId: string): Promise<ResponseObject<Status<{}>>> {
+        const url = `${this.url}/projects/${projectId}/branches/${branchId}/clones/${cloneId}`;
+        return this.get(url, this.defaultConfig());
+    }
+
     /**
      * @param projectId project identifier
      * @param options optional parameters for the request
@@ -50,6 +92,7 @@ export class SourceFiles extends CrowdinApi {
         }
         let url = `${this.url}/projects/${projectId}/branches`;
         url = this.addQueryParam(url, 'name', options.name);
+        url = this.addQueryParam(url, 'orderBy', options.orderBy);
         return this.getList(url, options.limit, options.offset);
     }
 
@@ -99,6 +142,51 @@ export class SourceFiles extends CrowdinApi {
     ): Promise<ResponseObject<SourceFilesModel.Branch>> {
         const url = `${this.url}/projects/${projectId}/branches/${branchId}`;
         return this.patch(url, request, this.defaultConfig());
+    }
+
+    /**
+     * @param projectId project identifier
+     * @param branchId branch identifier
+     * @param request request body
+     * @see https://support.crowdin.com/developer/api/v2/string-based/#tag/Branches/operation/api.projects.branches.merges.post
+     */
+    mergeBranch(
+        projectId: number,
+        branchId: number,
+        request: SourceFilesModel.MergeBranchRequest,
+    ): Promise<ResponseObject<Status<SourceFilesModel.MergeBranchAttributes>>> {
+        const url = `${this.url}/projects/${projectId}/branches/${branchId}/merges`;
+        return this.post(url, request, this.defaultConfig());
+    }
+
+    /**
+     * @param projectId project identifier
+     * @param branchId branch identifier
+     * @param mergeId merge branch identifier
+     * @see https://support.crowdin.com/developer/api/v2/string-based/#tag/Branches/operation/api.projects.branches.merges.get
+     */
+    checkBranchMergeStatus(
+        projectId: number,
+        branchId: number,
+        mergeId: string,
+    ): Promise<ResponseObject<Status<SourceFilesModel.MergeBranchAttributes>>> {
+        const url = `${this.url}/projects/${projectId}/branches/${branchId}/merges/${mergeId}`;
+        return this.get(url, this.defaultConfig());
+    }
+
+    /**
+     * @param projectId project identifier
+     * @param branchId branch identifier
+     * @param mergeId merge branch identifier
+     * @see https://support.crowdin.com/developer/api/v2/string-based/#tag/Branches/operation/api.projects.branches.merges.summary.get
+     */
+    getBranchMergeSummary(
+        projectId: number,
+        branchId: number,
+        mergeId: string,
+    ): Promise<ResponseObject<SourceFilesModel.MergeBranchSummary>> {
+        const url = `${this.url}/projects/${projectId}/branches/${branchId}/merges/${mergeId}/summary`;
+        return this.get(url, this.defaultConfig());
     }
 
     /**
@@ -154,6 +242,7 @@ export class SourceFiles extends CrowdinApi {
         url = this.addQueryParam(url, 'directoryId', options.directoryId);
         url = this.addQueryParam(url, 'filter', options.filter);
         url = this.addQueryParam(url, 'recursion', options.recursion);
+        url = this.addQueryParam(url, 'orderBy', options.orderBy);
         return this.getList(url, options.limit, options.offset);
     }
 
@@ -258,6 +347,7 @@ export class SourceFiles extends CrowdinApi {
         url = this.addQueryParam(url, 'directoryId', options.directoryId);
         url = this.addQueryParam(url, 'recursion', options.recursion);
         url = this.addQueryParam(url, 'filter', options.filter);
+        url = this.addQueryParam(url, 'orderBy', options.orderBy);
         return this.getList(url, options.limit, options.offset);
     }
 
@@ -490,6 +580,35 @@ export namespace SourceFilesModel {
         priority?: Priority;
     }
 
+    export interface CloneBranchRequest {
+        name: string;
+        title?: string;
+    }
+
+    export interface MergeBranchRequest {
+        deleteAfterMerge?: boolean;
+        sourceBranchId: number;
+        dryRun?: boolean;
+    }
+
+    export interface MergeBranchAttributes {
+        sourceBranchId: number;
+        deleteAfterMerge: boolean;
+    }
+
+    export interface MergeBranchSummary {
+        status: string;
+        sourceBranchId: number;
+        targetBranchId: number;
+        dryRun: boolean;
+        details: {
+            added: number;
+            deleted: number;
+            updated: number;
+            conflicted: number;
+        };
+    }
+
     export type Priority = 'low' | 'normal' | 'high';
 
     export interface ListProjectDirectoriesOptions extends PaginationOptions {
@@ -497,6 +616,7 @@ export namespace SourceFilesModel {
         directoryId?: number;
         filter?: string;
         recursion?: string;
+        orderBy?: string;
     }
 
     export interface Directory {
@@ -514,9 +634,9 @@ export namespace SourceFilesModel {
     }
 
     export interface CreateDirectoryRequest {
+        name: string;
         branchId?: number;
         directoryId?: number;
-        name: string;
         title?: string;
         exportPattern?: string;
         priority?: Priority;
@@ -527,6 +647,7 @@ export namespace SourceFilesModel {
         directoryId?: number;
         recursion?: any;
         filter?: string;
+        orderBy?: string;
     }
 
     export interface File {
@@ -560,28 +681,40 @@ export namespace SourceFilesModel {
         type?: FileType;
         parserVersion?: number;
         importOptions?: ImportOptions;
-        exportOptions?: GeneralExportOptions | PropertyExportOptions;
-        attachLabelIds?: number[];
+        exportOptions?: ExportOptions;
         excludedTargetLanguages?: string[];
+        attachLabelIds?: number[];
     }
 
     export interface ReplaceFileFromStorageRequest {
         storageId: number;
+        name?: string;
         updateOption?: UpdateOption;
         importOptions?: ImportOptions;
-        exportOptions?: GeneralExportOptions | PropertyExportOptions | JavaScriptExportOptions;
+        exportOptions?: ExportOptions;
         attachLabelIds?: number[];
         detachLabelIds?: number[];
+        replaceModifiedContext?: boolean;
     }
+
+    export type ExportOptions =
+        | GeneralExportOptions
+        | PropertyExportOptions
+        | JavaScriptExportOptions
+        | MdExportOptions;
 
     export type ImportOptions =
         | SpreadsheetImportOptions
         | XmlImportOptions
-        | OtherImportOptions
+        | WebXmlImportOptions
         | DocxFileImportOptions
         | HtmlFileImportOptions
         | HtmlFrontMatterFileImportOptions
-        | MdxV1FileImportOptions;
+        | MdxFileImportOptions
+        | MdFileImportOptions
+        | StringCatalogFileImportOptions
+        | AdocFileImportOptions
+        | OtherImportOptions;
 
     export interface RestoreFile {
         revisionId: number;
@@ -631,6 +764,7 @@ export namespace SourceFilesModel {
         | 'nsh'
         | 'wxl'
         | 'xliff'
+        | 'xliff_two'
         | 'html'
         | 'haml'
         | 'txt'
@@ -641,17 +775,34 @@ export namespace SourceFilesModel {
         | 'fm_md'
         | 'mediawiki'
         | 'docx'
+        | 'xlsx'
         | 'sbv'
+        | 'properties_play'
+        | 'properties_xml'
+        | 'maxthon'
+        | 'go_json'
+        | 'dita'
+        | 'mif'
+        | 'idml'
+        | 'stringsdict'
+        | 'plist'
         | 'vtt'
+        | 'vdf'
         | 'srt'
-        | 'arb';
+        | 'stf'
+        | 'toml'
+        | 'contentful_rt'
+        | 'svg'
+        | 'js'
+        | 'coffee'
+        | 'nestjs_i18n';
 
     export interface SpreadsheetImportOptions {
-        firstLineContainsHeader: boolean;
-        contentSegmentation: boolean;
-        srxStorageId: number;
-        importTranslations: boolean;
-        scheme: Scheme;
+        firstLineContainsHeader?: boolean;
+        contentSegmentation?: boolean;
+        srxStorageId?: number;
+        importTranslations?: boolean;
+        scheme?: Scheme;
     }
 
     export interface Scheme {
@@ -667,39 +818,63 @@ export namespace SourceFilesModel {
     }
 
     export interface XmlImportOptions {
-        translateContent: boolean;
-        translateAttributes: boolean;
-        contentSegmentation: boolean;
-        translatableElements: string[];
-        srxStorageId: number;
+        translateContent?: boolean;
+        translateAttributes?: boolean;
+        inlineTags?: string[];
+        contentSegmentation?: boolean;
+        translatableElements?: string[];
+        srxStorageId?: number;
+    }
+
+    export interface WebXmlImportOptions {
+        inlineTags?: string[];
+        contentSegmentation?: boolean;
+        srxStorageId?: number;
     }
 
     export interface DocxFileImportOptions {
-        cleanTagsAggressively: boolean;
-        translateHiddenText: boolean;
-        translateHyperlinkUrls: boolean;
-        translateHiddenRowsAndColumns: boolean;
-        importNotes: boolean;
-        importHiddenSlides: boolean;
-        contentSegmentation: boolean;
-        srxStorageId: number;
+        cleanTagsAggressively?: boolean;
+        translateHiddenText?: boolean;
+        translateHyperlinkUrls?: boolean;
+        translateHiddenRowsAndColumns?: boolean;
+        importNotes?: boolean;
+        importHiddenSlides?: boolean;
+        contentSegmentation?: boolean;
+        srxStorageId?: number;
     }
 
     export interface HtmlFileImportOptions {
-        excludedElements: string[];
-        contentSegmentation: boolean;
-        srxStorageId: number;
+        excludedElements?: string[];
+        inlineTags?: string[];
+        contentSegmentation?: boolean;
+        srxStorageId?: number;
     }
 
     export interface HtmlFrontMatterFileImportOptions extends HtmlFileImportOptions {
-        excludedFrontMatterElements: string[];
+        excludedFrontMatterElements?: string[];
     }
 
-    export interface MdxV1FileImportOptions {
-        excludedFrontMatterElements: string[];
-        excludeCodeBlocks: boolean;
-        contentSegmentation: boolean;
-        srxStorageId: number;
+    export interface MdxFileImportOptions {
+        excludedFrontMatterElements?: string[];
+        excludeCodeBlocks?: boolean;
+        contentSegmentation?: boolean;
+        srxStorageId?: number;
+    }
+
+    export interface MdFileImportOptions {
+        excludedFrontMatterElements?: string[];
+        excludeCodeBlocks?: boolean;
+        inlineTags?: string[];
+        contentSegmentation?: boolean;
+        srxStorageId?: number;
+    }
+
+    export interface StringCatalogFileImportOptions {
+        importKeyAsSource?: boolean;
+    }
+
+    export interface AdocFileImportOptions {
+        excludeIncludeDirectives?: boolean;
     }
 
     export interface OtherImportOptions {
@@ -708,18 +883,26 @@ export namespace SourceFilesModel {
     }
 
     export interface GeneralExportOptions {
-        exportPattern: string;
+        exportPattern?: string;
     }
 
     export interface PropertyExportOptions {
-        escapeQuotes: EscapeQuotes;
-        exportPattern: string;
+        escapeQuotes?: EscapeQuotes;
+        exportPattern?: string;
         escapeSpecialCharacters?: 0 | 1;
     }
 
     export interface JavaScriptExportOptions {
-        exportPattern: string;
+        exportPattern?: string;
         exportQuotes?: ExportQuotes;
+    }
+
+    export interface MdExportOptions {
+        exportPattern?: string;
+        strongMarker?: 'asterisk' | 'underscore';
+        emphasisMarker?: 'asterisk' | 'underscore';
+        unorderedListBullet?: 'asterisks' | 'plus' | 'plus';
+        tableColumnWidth?: 'consolidate' | 'evenly_distribute_cells';
     }
 
     export enum EscapeQuotes {
@@ -758,6 +941,7 @@ export namespace SourceFilesModel {
 
     export interface ListProjectBranchesOptions extends PaginationOptions {
         name?: string;
+        orderBy?: string;
     }
 
     export interface ListReviewedSourceFilesBuildOptions extends PaginationOptions {

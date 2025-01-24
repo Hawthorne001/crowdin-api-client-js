@@ -39,6 +39,8 @@ export class Glossaries extends CrowdinApi {
         }
         let url = `${this.url}/glossaries`;
         url = this.addQueryParam(url, 'groupId', options.groupId);
+        url = this.addQueryParam(url, 'orderBy', options.orderBy);
+        url = this.addQueryParam(url, 'userId', options.userId);
         return this.getList(url, options.limit, options.offset);
     }
 
@@ -194,6 +196,8 @@ export class Glossaries extends CrowdinApi {
         url = this.addQueryParam(url, 'languageId', options.languageId);
         url = this.addQueryParam(url, 'translationOfTermId', options.translationOfTermId);
         url = this.addQueryParam(url, 'conceptId', options.conceptId);
+        url = this.addQueryParam(url, 'orderBy', options.orderBy);
+        url = this.addQueryParam(url, 'croql', options.croql);
         return this.getList(url, options.limit, options.offset);
     }
 
@@ -293,8 +297,12 @@ export class Glossaries extends CrowdinApi {
      * @param options optional parameters for the request
      * @see https://developer.crowdin.com/api/v2/#operation/api.glossaries.concepts.getMany
      */
-    listConcepts(glossaryId: number, options?: PaginationOptions): Promise<ResponseList<GlossariesModel.Concept>> {
-        const url = `${this.url}/glossaries/${glossaryId}/concepts`;
+    listConcepts(
+        glossaryId: number,
+        options?: { orderBy?: string } & PaginationOptions,
+    ): Promise<ResponseList<GlossariesModel.Concept>> {
+        let url = `${this.url}/glossaries/${glossaryId}/concepts`;
+        url = this.addQueryParam(url, 'orderBy', options?.orderBy);
         return this.getList(url, options?.limit, options?.offset);
     }
 
@@ -356,9 +364,9 @@ export namespace GlossariesModel {
         terms: number;
         languageId: string;
         languageIds: string[];
-        defaultProjectId: number;
         defaultProjectIds: number[];
         projectIds: number[];
+        webUrl: string;
         createdAt: string;
     }
 
@@ -368,7 +376,20 @@ export namespace GlossariesModel {
         groupId?: number;
     }
 
-    export type ExportField = 'term' | 'description' | 'partOfSpeech' | 'type' | 'status' | 'gender' | 'note' | 'url';
+    export type ExportField =
+        | 'term'
+        | 'description'
+        | 'partOfSpeech'
+        | 'type'
+        | 'status'
+        | 'gender'
+        | 'note'
+        | 'url'
+        | 'conceptDefinition'
+        | 'conceptSubject'
+        | 'conceptNote'
+        | 'conceptUrl'
+        | 'conceptFigure';
 
     export interface ExportGlossaryRequest {
         format?: GlossaryFormat;
@@ -377,6 +398,7 @@ export namespace GlossariesModel {
 
     export interface GlossaryExportStatusAttribute {
         format: string;
+        exportFields: ExportField[];
     }
 
     export interface GlossaryImportStatusAttribute {
@@ -395,6 +417,8 @@ export namespace GlossariesModel {
         userId?: number;
         languageId?: string;
         conceptId?: number;
+        orderBy?: string;
+        croql?: string;
         /**
          * @deprecated
          */
@@ -425,22 +449,26 @@ export namespace GlossariesModel {
         text: string;
         description?: string;
         partOfSpeech?: PartOfSpeech;
-        /**
-         * @deprecated
-         */
-        translationOfTermId?: number;
         status?: Status;
         type?: Type;
         gender?: Gender;
         note?: string;
         url?: string;
         conceptId?: number;
+        /**
+         * @deprecated
+         */
+        translationOfTermId?: number;
     }
 
     export interface ConcordanceSearchRequest extends PaginationOptions {
         sourceLanguageId: string;
         targetLanguageId: string;
-        expression: string;
+        expressions: string[];
+        /**
+         * @deprecated
+         */
+        expression?: string;
     }
 
     export interface ConcordanceSearchResponse {
@@ -481,6 +509,8 @@ export namespace GlossariesModel {
 
     export interface ListGlossariesOptions extends PaginationOptions {
         groupId?: number;
+        userId?: number;
+        orderBy?: string;
     }
 
     export interface ClearGlossaryOptions {
@@ -498,6 +528,7 @@ export namespace GlossariesModel {
         glossaryId: number;
         subject: string;
         definition: string;
+        translatable: boolean;
         note: string;
         url: string;
         figure: string;
@@ -518,6 +549,7 @@ export namespace GlossariesModel {
     export interface UpdateConceptRequest {
         subject?: string;
         definition?: string;
+        translatable?: boolean;
         note?: string;
         url?: string;
         figure?: string;

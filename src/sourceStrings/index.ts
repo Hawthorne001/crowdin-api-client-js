@@ -113,6 +113,8 @@ export class SourceStrings extends CrowdinApi {
         url = this.addQueryParam(url, 'croql', options.croql);
         url = this.addQueryParam(url, 'branchId', options.branchId);
         url = this.addQueryParam(url, 'directoryId', options.directoryId);
+        url = this.addQueryParam(url, 'orderBy', options.orderBy);
+        url = this.addQueryParam(url, 'taskId', options.taskId);
         return this.getList(url, options.limit, options.offset);
     }
 
@@ -207,6 +209,9 @@ export namespace SourceStringsModel {
             importTranslations: boolean;
             scheme: SourceFilesModel.Scheme;
         };
+        updateStrings: boolean;
+        cleanupMode: boolean;
+        updateOption: UpdateOption;
     }
 
     export interface UploadStringsRequest {
@@ -222,44 +227,49 @@ export namespace SourceStringsModel {
             importTranslations: boolean;
             scheme: SourceFilesModel.Scheme;
         };
+        updateOption?: UpdateOption;
     }
 
     export interface ListProjectStringsOptions extends PaginationOptions {
-        fileId?: number;
-        filter?: string;
+        orderBy?: string;
         denormalizePlaceholders?: BooleanInt;
         labelIds?: string;
-        scope?: SourceStringsModel.Scope;
-        croql?: string;
+        fileId?: number;
         branchId?: number;
         directoryId?: number;
+        taskId?: number;
+        croql?: string;
+        filter?: string;
+        scope?: SourceStringsModel.Scope;
     }
 
     export interface String {
         id: number;
         projectId: number;
-        fileId: number;
         branchId: number;
         identifier: string;
         text: string | PluralText;
         type: Type;
         context: string;
         maxLength: number;
+        isHidden: boolean;
         isDuplicate: boolean;
         masterStringId: boolean;
-        isHidden: boolean;
-        revision: number;
         hasPlurals: boolean;
         isIcu: boolean;
         labelIds: number[];
+        webUrl: string;
         createdAt: string;
         updatedAt: string;
+        fileId: number;
+        directoryId: number;
+        revision: number;
     }
 
     export interface CreateStringRequest {
         text: string | PluralText;
         identifier?: string;
-        fileId?: number;
+        fileId: number;
         context?: string;
         isHidden?: boolean;
         maxLength?: number;
@@ -292,4 +302,8 @@ export namespace SourceStringsModel {
     }
 
     export type Scope = 'identifier' | 'text' | 'context';
+    export type UpdateOption =
+        | 'clear_translations_and_approvals'
+        | 'keep_translations'
+        | 'keep_translations_and_approvals';
 }
